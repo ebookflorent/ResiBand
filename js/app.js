@@ -36,6 +36,33 @@ function matchRoute(pathname) {
   return null;
 }
 
+// Révélation au scroll : les éléments [data-reveal] apparaissent en entrant
+// dans le viewport (désactivé si prefers-reduced-motion)
+let revealObserver = null;
+
+function setupReveal() {
+  if (revealObserver) revealObserver.disconnect();
+
+  const elements = document.querySelectorAll('[data-reveal]:not(.revealed)');
+  if (elements.length === 0) return;
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+    elements.forEach(el => el.classList.add('revealed'));
+    return;
+  }
+
+  revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+
+  elements.forEach(el => revealObserver.observe(el));
+}
+
 async function navigate(pathname) {
   const matched = matchRoute(pathname);
 
@@ -45,7 +72,7 @@ async function navigate(pathname) {
         <div class="empty-state">
           <div class="empty-state-icon">🔍</div>
           <div class="empty-state-text">Page introuvable</div>
-          <a href="/" class="btn btn-primary mt-2" data-link>Retour a l'accueil</a>
+          <a href="/" class="btn btn-primary mt-2" data-link>Retour à l'accueil</a>
         </div>
       </div>
     `;
@@ -70,6 +97,7 @@ async function navigate(pathname) {
 
   updateActiveNav(pathname);
   window.scrollTo(0, 0);
+  setupReveal();
 }
 
 function updateActiveNav(pathname) {
@@ -97,6 +125,7 @@ document.addEventListener('click', (e) => {
     const btn = document.getElementById('mobile-menu-btn');
     nav.classList.remove('open');
     btn.classList.remove('active');
+    btn.setAttribute('aria-expanded', 'false');
   }
 });
 
@@ -107,8 +136,14 @@ window.addEventListener('popstate', () => {
 const mobileBtn = document.getElementById('mobile-menu-btn');
 const mainNav = document.getElementById('main-nav');
 mobileBtn.addEventListener('click', () => {
-  mainNav.classList.toggle('open');
-  mobileBtn.classList.toggle('active');
+  const open = mainNav.classList.toggle('open');
+  mobileBtn.classList.toggle('active', open);
+  mobileBtn.setAttribute('aria-expanded', String(open));
 });
+
+// Pages dynamiques (quiz, comparateur) : permet de ré-observer
+// les éléments injectés après le rendu initial
+export function refreshReveal() { setupReveal(); }
+window.__vcRefreshReveal = setupReveal;
 
 navigate(window.location.pathname);

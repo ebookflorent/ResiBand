@@ -3,52 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="VoteClaire - Comparateur transparent des programmes presidentiels 2027. Comparez les candidats, calculez l'impact des mesures, trouvez votre candidat.">
-  <meta name="theme-color" content="#1e3a5f">
-  <title>VoteClaire - Comparateur des Programmes Presidentiels 2027</title>
+  <meta name="description" content="VoteClaire — Comparateur transparent des programmes présidentiels 2027. Comparez les candidats, calculez l'impact des mesures, trouvez votre candidat.">
+  <meta name="theme-color" content="#131c4d">
+  <title>VoteClaire — Comparateur des programmes présidentiels 2027</title>
   <link rel="stylesheet" href="/css/styles.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗳️</text></svg>">
 </head>
 <body>
   <header class="site-header">
     <div class="container header-inner">
-      <a href="/" class="logo" data-link>
-        <span class="logo-icon">🗳️</span>
+      <a href="/" class="logo" data-link aria-label="VoteClaire — Accueil">
+        <span class="logo-mark">🗳️</span>
         <span class="logo-text">Vote<span class="logo-accent">Claire</span></span>
       </a>
-      <nav class="main-nav" id="main-nav">
+      <nav class="main-nav" id="main-nav" aria-label="Navigation principale">
         <a href="/" class="nav-link" data-link>Accueil</a>
         <a href="/candidats" class="nav-link" data-link>Candidats</a>
         <a href="/comparateur" class="nav-link" data-link>Comparateur</a>
-        <a href="/mon-candidat" class="nav-link" data-link>Mon Candidat</a>
+        <a href="/mon-candidat" class="nav-link" data-link>Mon candidat</a>
         <a href="/impact" class="nav-link" data-link>Impact</a>
-        <a href="/methodologie" class="nav-link" data-link>Methodologie</a>
+        <a href="/methodologie" class="nav-link" data-link>Méthodologie</a>
       </nav>
-      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
+      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
     </div>
   </header>
 
   <main id="app" class="main-content">
-    <!-- Content rendered by SPA router -->
+    <!-- Contenu rendu par le routeur SPA -->
   </main>
 
   <footer class="site-footer">
-    <div class="container footer-inner">
-      <div class="footer-brand">
-        <span class="logo-icon">🗳️</span>
-        <span>Vote<span class="logo-accent">Claire</span></span>
-        <p class="footer-tagline">Comparateur transparent des programmes presidentiels 2027</p>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="/" class="logo" data-link>
+            <span class="logo-mark">🗳️</span>
+            <span class="logo-text">Vote<span class="logo-accent">Claire</span></span>
+          </a>
+          <p class="footer-tagline">
+            Comparateur transparent et non partisan des programmes présidentiels 2027.
+            Chaque score est expliqué, chaque source est citée.
+          </p>
+        </div>
+        <div class="footer-col">
+          <p class="footer-col-title">Explorer</p>
+          <a href="/candidats" data-link>Les candidats</a>
+          <a href="/comparateur" data-link>Comparateur</a>
+          <a href="/mon-candidat" data-link>Trouver mon candidat</a>
+          <a href="/impact" data-link>Tableau de bord d'impact</a>
+        </div>
+        <div class="footer-col">
+          <p class="footer-col-title">Transparence</p>
+          <a href="/methodologie" data-link>Méthodologie complète</a>
+          <a href="/methodologie" data-link>Sources et données</a>
+          <a href="/methodologie" data-link>Limites et précautions</a>
+        </div>
       </div>
-      <div class="footer-links">
-        <a href="/methodologie" data-link>Methodologie</a>
-        <a href="/a-propos" data-link>A propos</a>
-      </div>
-      <div class="footer-disclaimer">
-        <p>VoteClaire est un outil independant et non partisan. Les scores sont des evaluations editoriales basees sur des sources publiques. <a href="/methodologie" data-link>En savoir plus.</a></p>
-        <p class="footer-updated">Derniere mise a jour : Juillet 2025</p>
+      <div class="footer-bottom">
+        <span>
+          <span class="tricolore" aria-hidden="true"><span></span><span></span><span></span></span>
+          VoteClaire est un outil indépendant et non partisan. Les scores sont des évaluations éditoriales.
+        </span>
+        <span>Dernière mise à jour : juillet 2025 · <a href="/methodologie" data-link>En savoir plus</a></span>
       </div>
     </div>
   </footer>

@@ -134,18 +134,18 @@ export function getImpactClass(level) {
 // Get impact label in French
 export function getImpactLabel(level) {
   const labels = {
-    '-3': 'Tres negatif',
-    '-2': 'Negatif',
-    '-1': 'Legerement negatif',
+    '-3': 'Très négatif',
+    '-2': 'Négatif',
+    '-1': 'Légèrement négatif',
     '0': 'Neutre',
-    '1': 'Legerement positif',
+    '1': 'Légèrement positif',
     '2': 'Positif',
-    '3': 'Tres positif',
+    '3': 'Très positif',
   };
   return labels[String(level)] || 'Neutre';
 }
 
 export function getFeasibilityLabel(score) {
-  const labels = { 1: 'Tres difficile', 2: 'Difficile', 3: 'Moderee', 4: 'Faisable', 5: 'Facilement realisable' };
-  return labels[score] || 'Non evalue';
+  const labels = { 1: 'Très difficile', 2: 'Difficile', 3: 'Modérée', 4: 'Faisable', 5: 'Facilement réalisable' };
+  return labels[score] || 'Non évalué';
 }

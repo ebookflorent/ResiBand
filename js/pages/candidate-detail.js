@@ -1,10 +1,11 @@
 import { getCandidateById } from '../data/candidates.js';
-import { themes, getThemeById } from '../data/themes.js';
+import { themes } from '../data/themes.js';
 import { allMeasures, getMeasuresByCandidate } from '../data/measures/index.js';
 import { scoreCandidateGlobal, getScoreClass, getImpactClass, getImpactLabel, getFeasibilityLabel } from '../lib/scoring.js';
 import { aggregateBudgetImpact, aggregateImpactByAxis } from '../lib/impact.js';
 import { defaultWeights } from '../data/scoring-weights.js';
 import { formatBudgetRange, formatDate, formatPercent } from '../lib/formatting.js';
+import { partyBadge, candidacyBadge, statusLabels, statusClasses, scoreRing, partyVars, onColor } from '../lib/ui.js';
 
 export async function renderCandidateDetail(container, params) {
   const candidate = getCandidateById(params.slug);
@@ -33,88 +34,73 @@ export async function renderCandidateDetail(container, params) {
     measuresByTheme[m.themeId].push(m);
   }
 
-  const statusLabels = {
-    'programme-officiel': 'Programme officiel',
-    'declaration-publique': 'Declaration publique',
-    'rumeur': 'Rumeur',
-    'abandonnee': 'Abandonnee',
-  };
-
-  const statusClasses = {
-    'programme-officiel': 'status-officiel',
-    'declaration-publique': 'status-declaration',
-    'rumeur': 'status-rumeur',
-    'abandonnee': 'status-abandonnee',
-  };
-
-  const candidacyLabels = { declare: 'Candidature declaree', probable: 'Candidature probable', possible: 'Candidature possible' };
-
   container.innerHTML = `
     <div class="container">
-      <a href="/candidats" class="btn btn-sm btn-outline mb-3" data-link>← Retour aux candidats</a>
+      <div style="margin-top:1.6rem">
+        <a href="/candidats" class="btn btn-sm btn-outline mb-3" data-link>← Tous les candidats</a>
+      </div>
 
-      <div class="card candidate-profile" style="--party-color: ${candidate.party.color}">
-        <div class="profile-avatar" style="border-color: ${candidate.party.color}">
-          ${candidate.initials}
-        </div>
+      <div class="card candidate-profile fade-in" style="${partyVars(candidate.party)}">
+        <div class="profile-avatar">${candidate.initials}</div>
         <div class="profile-info">
           <h1>${candidate.fullName}</h1>
           <div class="flex gap-1 flex-wrap mb-1">
-            <span class="party-badge" style="background: ${candidate.party.color}">${candidate.party.name}</span>
-            <span class="candidacy-badge candidacy-${candidate.candidacyStatus}">${candidacyLabels[candidate.candidacyStatus]}</span>
+            <span class="party-badge" style="background: ${candidate.party.color}; color:${onColor(candidate.party.color)}; ${onColor(candidate.party.color) !== '#ffffff' ? 'text-shadow:none' : ''}">${candidate.party.name}</span>
+            ${candidacyBadge(candidate.candidacyStatus, true)}
           </div>
           <p class="profile-bio">${candidate.bio}</p>
           <div class="profile-meta">
-            <span class="profile-meta-item">📋 ${measures.length} mesures repertoriees</span>
-            <span class="profile-meta-item">📊 ${themesWithData}/${themes.length} themes couverts</span>
-            <span class="profile-meta-item">🔄 Mis a jour le ${formatDate(candidate.lastUpdated)}</span>
+            <span class="profile-meta-item">📋 ${measures.length} mesures répertoriées</span>
+            <span class="profile-meta-item">📊 ${themesWithData}/${themes.length} thèmes couverts</span>
+            <span class="profile-meta-item">🔄 Mis à jour le ${formatDate(candidate.lastUpdated)}</span>
           </div>
         </div>
       </div>
 
       <div class="stats-row">
-        <div class="stat-card card">
-          <div class="stat-value ${getScoreClass(overallScore)}">${Math.round(overallScore)}</div>
-          <div class="stat-label">Score global /100</div>
+        <div class="stat-card card fade-in stagger-1" style="display:grid; place-items:center; gap:0.4rem">
+          ${scoreRing(overallScore, { size: 82, stroke: 8 })}
+          <div class="stat-label">Score global</div>
         </div>
-        <div class="stat-card card">
+        <div class="stat-card card fade-in stagger-2">
           <div class="stat-value">${formatPercent(confidence)}</div>
-          <div class="stat-label">Confiance donnees</div>
+          <div class="stat-label">Confiance des données</div>
         </div>
-        <div class="stat-card card">
-          <div class="stat-value" style="font-size:1.3rem; color: ${budget.midpoint < 0 ? 'var(--color-negative)' : 'var(--color-positive)'}">
-            ${budget.midpoint < 0 ? '' : '+'}${Math.round(budget.midpoint).toLocaleString('fr-FR')} M€
+        <div class="stat-card card fade-in stagger-3">
+          <div class="stat-value" style="font-size:1.5rem; color: ${budget.midpoint < 0 ? 'var(--div-neg-text)' : 'var(--div-pos-text)'}">
+            ${budget.midpoint < 0 ? '' : '+'}${Math.round(budget.midpoint).toLocaleString('fr-FR')}&nbsp;M€
           </div>
-          <div class="stat-label">Impact budgetaire estime /an</div>
+          <div class="stat-label">Impact budgétaire estimé / an</div>
         </div>
-        <div class="stat-card card">
+        <div class="stat-card card fade-in stagger-4">
           <div class="stat-value">${measures.length}</div>
-          <div class="stat-label">Mesures</div>
+          <div class="stat-label">Mesures analysées</div>
         </div>
       </div>
 
-      <div class="card mb-3">
-        <h3 class="impact-card-title">Profil d'impact moyen</h3>
-        <div class="flex flex-wrap gap-2">
-          ${renderImpactBar('Social', impacts.social, '👥')}
-          ${renderImpactBar('Environnement', impacts.environmental, '🌱')}
-          ${renderImpactBar('Faisabilite', (impacts.feasibility - 3) / 2 * 3, '⚙️')}
-          ${renderImpactBar('Libertes', impacts.liberty, '⚖️')}
-          ${renderImpactBar('Compatibilite UE', impacts.european, '🇪🇺')}
+      <div class="card mb-3" data-reveal>
+        <h3 class="impact-card-title">Profil d'impact moyen des mesures</h3>
+        <div class="impact-profile-grid">
+          ${renderBipolarAxis('👥 Social', impacts.social, 3)}
+          ${renderBipolarAxis('🌱 Environnement', impacts.environmental, 3)}
+          ${renderBipolarAxis('⚖️ Libertés', impacts.liberty, 3)}
+          ${renderBipolarAxis('🇪🇺 Compatibilité UE', impacts.european, 3)}
+          ${renderBipolarAxis('⚙️ Faisabilité', impacts.feasibility - 3, 2, ' / 5', impacts.feasibility)}
         </div>
       </div>
 
-      <div class="page-header">
-        <h2 class="page-title">Programme detaille</h2>
-        <p class="page-subtitle">${measures.length} mesures classees par thematique</p>
+      <div class="page-header" data-reveal>
+        <span class="section-kicker">Programme détaillé</span>
+        <h2 class="page-title">Les mesures, thème par thème</h2>
+        <p class="page-subtitle">${measures.length} mesures documentées et sourcées, classées par thématique.</p>
       </div>
 
-      ${themes.filter(t => measuresByTheme[t.id]).map(theme => {
+      ${themes.filter(t => measuresByTheme[t.id]).map((theme, ti) => {
         const themeMeasures = measuresByTheme[theme.id];
         const ts = themeScores.find(s => s.themeId === theme.id);
         return `
-          <div class="measures-section" id="theme-${theme.id}">
-            <div class="theme-header" data-toggle="theme-${theme.id}-list">
+          <div class="measures-section" id="theme-${theme.id}" data-reveal style="--reveal-delay:${Math.min(ti * 0.03, 0.2)}s">
+            <div class="theme-header" data-toggle="theme-${theme.id}-list" style="--theme-color:${theme.color}">
               <span class="theme-icon">${theme.icon}</span>
               <h3 class="theme-title">${theme.label}</h3>
               <span class="theme-count">${themeMeasures.length} mesure${themeMeasures.length > 1 ? 's' : ''}</span>
@@ -123,7 +109,7 @@ export async function renderCandidateDetail(container, params) {
             </div>
             <div class="measures-list" id="theme-${theme.id}-list">
               ${themeMeasures.map(m => `
-                <div class="card measure-card" style="border-left-color: ${theme.color}">
+                <div class="card measure-card" style="--theme-color: ${theme.color}">
                   <div class="measure-header">
                     <h4 class="measure-title">${m.title}</h4>
                     <span class="status-badge ${statusClasses[m.status]}">${statusLabels[m.status]}</span>
@@ -149,8 +135,8 @@ export async function renderCandidateDetail(container, params) {
         `;
       }).join('')}
 
-      <div class="text-center mt-4">
-        <a href="/comparateur" class="btn btn-outline" data-link>⚖️ Comparer avec un autre candidat</a>
+      <div class="text-center mt-4" data-reveal>
+        <a href="/comparateur?candidats=${candidate.id}" class="btn btn-primary" data-link>⚖️ Comparer avec un autre candidat</a>
       </div>
     </div>
   `;
@@ -158,17 +144,29 @@ export async function renderCandidateDetail(container, params) {
   setupThemeToggles();
 }
 
-function renderImpactBar(label, value, icon) {
-  const pct = ((value + 3) / 6) * 100;
-  const color = value > 0 ? 'var(--color-positive)' : value < 0 ? 'var(--color-negative)' : 'var(--color-neutral)';
+// Barre bipolaire centrée sur zéro : la valeur part du centre vers la
+// gauche (négatif, rouge) ou la droite (positif, bleu)
+function renderBipolarAxis(label, value, maxAbs, suffix = '', displayValue = null) {
+  const clamped = Math.max(-maxAbs, Math.min(maxAbs, value));
+  const halfPct = Math.abs(clamped) / maxAbs * 50;
+  const isNeg = clamped < 0;
+  const color = isNeg ? 'var(--div-neg-fill)' : clamped > 0 ? 'var(--div-pos-fill)' : 'var(--neutral-fill)';
+  const textColor = isNeg ? 'var(--div-neg-text)' : clamped > 0 ? 'var(--div-pos-text)' : 'var(--ink-3)';
+  const shown = displayValue !== null ? displayValue : value;
+  const prefix = displayValue === null && shown > 0 ? '+' : '';
+
   return `
-    <div style="flex: 1; min-width: 150px;">
-      <div class="score-row mb-1">
-        <span class="score-label">${icon} ${label}</span>
-        <span style="font-weight:600; color: ${color}">${value > 0 ? '+' : ''}${value.toFixed(1)}</span>
+    <div class="impact-axis">
+      <div class="axis-head">
+        <span class="axis-name">${label}</span>
+        <span class="axis-value" style="color:${textColor}">${prefix}${shown.toFixed(1)}${suffix}</span>
       </div>
-      <div class="bar-track" style="height: 8px">
-        <div style="width: ${pct}%; height: 100%; background: ${color}; border-radius: var(--radius-sm); transition: width 0.4s ease"></div>
+      <div class="bipolar-track">
+        <div class="bipolar-fill" style="
+          ${isNeg ? `right: 50%; --origin: right;` : `left: 50%; --origin: left;`}
+          width: ${Math.max(halfPct, 1.5)}%;
+          background: ${color};
+        "></div>
       </div>
     </div>
   `;

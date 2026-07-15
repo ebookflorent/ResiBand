@@ -7,14 +7,13 @@ export function formatCurrency(amount, unit = 'millions') {
 }
 
 export function formatBudgetRange(budget) {
-  // Format a budget impact range like "-15 000 à -20 000 M€/an"
-  if (!budget) return 'Non estime';
-  const low = formatCurrency(budget.low, budget.unit);
-  const high = formatCurrency(budget.high, budget.unit);
-  const prefix = budget.low < 0 ? '' : '+';
+  // Format a budget impact range like "−15 000 à −20 000 M€/an"
+  // Chaque borne porte son signe : un coût reste visiblement négatif
+  if (!budget) return 'Non estimé';
+  const signed = (v) => (v < 0 ? '−' : '+') + formatCurrency(v, budget.unit);
   const timeLabel = budget.timeframe === 'annuel' ? '/an' : budget.timeframe === 'quinquennat' ? '/5 ans' : '';
-  if (budget.low === budget.high) return prefix + low + timeLabel;
-  return `${prefix}${low} a ${formatCurrency(Math.abs(budget.high), budget.unit)}${timeLabel}`;
+  if (budget.low === budget.high) return signed(budget.low) + timeLabel;
+  return `${signed(budget.low)} à ${signed(budget.high)}${timeLabel}`;
 }
 
 export function formatDate(isoDate) {
